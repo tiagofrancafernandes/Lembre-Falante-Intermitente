@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lembretes Intermitentes</title>
+    <!-- <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.2/dist/cdn.min.js" defer></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script> --> <!-- LATEST -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import forms from 'https://cdn.jsdelivr.net/npm/@tailwindcss/forms@0.5.9/+esm';
+        tailwind.config = {
+            darkMode: 'media',//'selector',
+            theme: {
+                extend: {
+                    colors: {
+                        clifford: '#123',
+                    }
+                }
+            },
+            plugins: [
+                forms,
+            ],
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.2/dist/cdn.min.js" defer></script>
+    <style>[x-cloak] { display: none !important; }</style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900" x-data="reminderApp()">
+    <div x-cloak class="mt-8 mx-4 md:w-11/12 md:mx-auto">
+    <div x-cloak class="w-full my-4">
+        <!-- loop-speaking-reminder -->
+        <h5 class="text-2xl pl-5 text-gray-800 dark:text-gray-200">Lembretes Falantes Intermitentes</h5>
+    </div>
+
+    <!-- Botão para abrir o modal -->
+    <button x-cloak @click="openModal = true" class="bg-blue-500 text-white px-4 py-2 rounded mt-4 ml-4">Adicionar Lembrete</button>
+
+    <!-- Modal de cadastro/edição -->
+    <div x-cloak x-show="openModal" class="fixed z-[800] inset-0 bg-gray-800 bg-opacity-90 flex items-center justify-center">
+        <div class="bg-white dark:bg-gray-900 p-6 rounded shadow-lg w-1/3">
+            <h2 class="text-gray-800 dark:text-gray-200 text-xl font-bold mb-4" x-text="editMode ? 'Editar Lembrete' : 'Novo Lembrete'"></h2>
+            <form @submit.prevent="editMode ? updateReminder() : addReminder()" class="w-full">
+                <div class="relative z-0 w-full mb-5 group">
+                    <input type="text" x-model="currentReminder.title" name="title" id="title" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " required />
+                    <label for="title" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Título</label>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-800 dark:text-gray-200 mb-4">Recorrência</label>
+                    <div class="grid md:grid-cols-3 md:gap-6">
+                        <div class="relative z-0 w-full mb-5 group">
+                            <input
+                                type="number"
+                                x-model="currentReminder.hours" name="hours" id="hours" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " min="0"
+                                x-bind:required="!currentReminder.minutes && !currentReminder.seconds"
+                            />
+                            <label for="hours" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Horas</label>
+                        </div>
+                        <div class="relative z-0 w-full mb-5 group">
+                            <input
+                                type="number"
+                                x-model="currentReminder.minutes" name="minutes" id="minutes" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " min="0" max="59"
+                                x-bind:required="!currentReminder.hours && !currentReminder.seconds"
+                            />
+                            <label for="minutes" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Minutos</label>
+                        </div>
+                        <div class="relative z-0 w-full mb-5 group">
+                            <input
+                                type="number"
+                                x-model="currentReminder.seconds" name="seconds" id="seconds" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer" placeholder=" " min="0" max="59"
+                                x-bind:required="!currentReminder.minutes && !currentReminder.hours"
+                            />
+                            <label for="seconds" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:start-0 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Segundos</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label
+                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                    >
+                        Mensagem
+                        <span class="text-xs text-gray-500 italic">Texto a ser falado ao fim do ciclo. Se ficar em branco, o título será usado.</span>
+                    </label>
+                    <textarea
+                        x-model="currentReminder.message"
+                        rows="6"
+                        class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                        x-bind:placeholder="[
+                        'Exemplos:',
+                        'Tomar água.',
+                        'Pausa rápida.'
+                        ].join(`\n`)"
+                    ></textarea>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" @click="closeFormModal" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancelar</button>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de confirmação de exclusão -->
+    <div x-cloak x-show="confirmDeleteModal" class="fixed z-[900] inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center">
+        <div class="bg-white dark:bg-gray-900 p-6 rounded shadow-lg w-1/3">
+            <h2 class="text-gray-800 dark:text-gray-200 text-xl font-bold mb-4">Confirmar Exclusão</h2>
+            <p class="text-gray-800 dark:text-gray-200 mb-4">Tem certeza de que deseja excluir este lembrete?</p>
+            <div class="flex justify-end">
+                <button type="button" @click="confirmDeleteModal = false" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancelar</button>
+                <button type="button" @click="deleteReminder(reminderToDelete)" class="bg-red-500 text-white px-4 py-2 rounded">Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de lembretes -->
+    <div x-cloak class="mt-8 mx-4">
+        <template x-for="reminder in reminders" :key="reminder.id">
+            <div
+                class="bg-gray-50 border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 p-4 mb-4 flex justify-between items-center transition duration-300 ease-in-out md:hover:scale-[1.01]"
+                x-bind:class="{
+                    'opacity-40 hover:opacity-100': !reminder.running,
+                    
+                }"
+            >
+                <div class="flex flex-col md:flex-row w-full gap-4">
+                    <div class="w-full">
+                        <h3 class="text-gray-700 dark:text-gray-200/70 text-lg font-bold w-full p-0">
+                            <span class="relative flex h-4 w-4 -start-3 -top-3 p-0">
+                                <span x-show="reminder.running" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span x-show="reminder.running" class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                            </span>
+                            <span x-text="reminder.title"></span>
+                        </h3>
+                        <p class="text-gray-600 dark:text-gray-300" x-text="reminder.message"></p>
+                        <p class="text-gray-500 dark:text-gray-400" x-text="'Tempo restante: ' + formatTime(reminder.remainingTime)"></p>
+                    </div>
+
+                    <div class="flex items-center justify-center md:w-4/12">
+                        <button @click="toggleReminder(reminder.id)" class="bg-green-500 text-white px-3 py-1 rounded mr-2">
+                            <svg x-cloak x-show="!reminder.running" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 15 15" stroke="currentColor">
+                                <path d="M4.79 2.093A.5.5 0 004 2.5v10a.5.5 0 00.79.407l7-5a.5.5 0 000-.814l-7-5z" fill="currentColor"></path>
+                            </svg>
+                            <svg x-cloak x-show="reminder.running" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 15 15" stroke="currentColor">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M5 12V3h1v9H5zm4 0V3h1v9H9z" fill="currentColor"></path>
+                            </svg>
+                        </button>
+                        <button
+                            @click="stopReminder(reminder.id)"
+                            class="bg-blue-500 text-white px-3 py-1 rounded mr-2"
+                            x-bind:class="{ 'opacity-30 cursor-not-allowed': !reminder?.running }"
+                            x-bind:disabled="!reminder?.running"
+                        >
+                            <svg x-cloak xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 15 15" stroke="currentColor">
+                                <path d="M12 3H3v9h9V3z" fill="currentColor"></path>
+                            </svg>
+                        </button>
+                        <button
+                            @click="restartReminder(reminder.id)"
+                            class="bg-blue-500 text-white px-3 py-1 rounded mr-2"
+                            x-bind:class="{ 'opacity-30 cursor-not-allowed': !reminder?.running }"
+                            x-bind:disabled="!reminder?.running"
+                        >
+                            <svg x-cloak xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="2 -3 10 20" fill="currentColor">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M14 7.5A6.5 6.5 0 007.5 1V0a7.5 7.5 0 015.099 13H15v1h-4v-4h1v2.19a6.48 6.48 0 002-4.69zM2.4 2H0V1h4v4H3V2.81A6.5 6.5 0 007.5 14v1A7.5 7.5 0 012.4 2z" fill="currentColor"></path>
+                            </svg>
+                        </button>
+                        <button
+                            @click="editReminder(reminder)" class="bg-yellow-500 text-white px-3 py-1 rounded mr-2"
+                            x-bind:class="{ 'opacity-30 cursor-not-allowed': reminder?.running }"
+                            x-bind:disabled="reminder?.running"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 -5 18 28" stroke="currentColor">
+                                <path d="M9.854.146a.5.5 0 00-.708 0L6.5 2.793 12.207 8.5l2.647-2.646a.5.5 0 000-.708l-5-5zM0 9.293L5.793 3.5 11.5 9.207 5.707 15H.5a.5.5 0 01-.5-.5V9.293zM8 15h7v-1H8v1z" fill="currentColor"></path>
+                            </svg>
+                        </button>
+                        <button
+                            @click="showDeleteConfirmation(reminder.id)" class="bg-red-500 text-white px-3 py-1 rounded"
+                            x-bind:class="{ 'opacity-30 cursor-not-allowed': reminder?.running }"
+                            x-bind:disabled="reminder?.running"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+    </div>
+
+    <script>
+        globalThis.generateTTSAudio = function (text, slow = false) {
+            text = typeof text === 'string' ? text : '';
+            let speed = slow ? 0 : 1;
+            text = text.includes('%') && !text.includes(' ') ? text : encodeURI(decodeURI(text));
+            // return `//translate.googleapis.com/translate_tts?client=gtx&q=${text}&tl=pt&ttsspeed=${speed}`;
+
+            let ttsBaseUrl = "https://labpixel.com.br/api-gateway/public/api/apis/helpers/tts"; // Ex: https://apps.tiagofranca.com/api/apis/helpers/tts
+
+            return `${ttsBaseUrl}?q=${text}&locale=pt&speed=${speed}`;
+        };
+
+        function reminderApp() {
+            return {
+                openModal: false,
+                confirmDeleteModal: false,
+                editMode: false,
+                currentReminder: { id: null, title: '', hours: '', minutes: '', seconds: '', message: '' },
+                reminders: [],
+                reminderToDelete: null,
+                init() {
+                    let _reminders = JSON.parse(localStorage.getItem('reminders')) || [];
+                    _reminders = Array.isArray(_reminders) ? _reminders : [];
+                    this.reminders = _reminders?.map(reminder => {
+                        reminder.running = false;
+                        reminder.timer = null;
+                        return reminder;
+                    });
+                },
+                addReminder() {
+                    this.sanitizeTimeInputs();
+                    const totalSeconds = this.calculateTotalSeconds(this.currentReminder);
+
+                    if (!totalSeconds || totalSeconds <= 0) {
+                        alert('Por favor, insira um tempo válido maior que zero.');
+                        return;
+                    }
+
+                    const id = Date.now();
+                    this.reminders.push({ ...this.currentReminder, id, running: false, remainingTime: totalSeconds });
+                    this.saveReminders();
+                    this.closeFormModal()
+                    this.resetForm();
+                },
+                editReminder(reminder) {
+                    this.resetForm();
+                    this.currentReminder = { ...reminder };
+                    this.editMode = true;
+                    this.openModal = true;
+                },
+                updateReminder() {
+                    this.sanitizeTimeInputs();
+                    const totalSeconds = this.calculateTotalSeconds(this.currentReminder);
+                    if (totalSeconds > 0) {
+                        const index = this.reminders.findIndex(r => r.id === this.currentReminder.id);
+                        if (index !== -1) {
+                            const wasRunning = this.reminders[index].running;
+                            if (wasRunning) {
+                                clearInterval(this.reminders[index].timer);
+                            }
+                            this.reminders.splice(index, 1, { ...this.currentReminder, remainingTime: totalSeconds, running: false });
+                            if (wasRunning) {
+                                this.startTimer(this.reminders[index]);
+                            }
+                            this.saveReminders();
+                            this.closeFormModal();
+                            this.resetForm();
+                        }
+                    } else {
+                        alert('Por favor, insira um tempo válido maior que zero.');
+                    }
+                },
+                showDeleteConfirmation(id) {
+                    this.reminderToDelete = id;
+                    this.confirmDeleteModal = true;
+                },
+                deleteReminder(id) {
+                    const reminder = this.reminders.find(r => r.id === id);
+                    if (reminder && reminder.running) {
+                        clearInterval(reminder.timer);
+                    }
+                    this.reminders = this.reminders.filter(r => r.id !== id);
+                    this.saveReminders();
+                    this.confirmDeleteModal = false;
+                },
+                toggleReminder(id) {
+                    const reminder = this.reminders.find(r => r.id === id);
+                    if (reminder.running) {
+                        clearInterval(reminder.timer);
+                        reminder.running = false;
+                    } else {
+                        this.startTimer(reminder);
+                    }
+                    this.saveReminders();
+                },
+                startTimer(reminder) {
+                    reminder.running = true;
+                    reminder.timer = setInterval(() => {
+                        if (reminder.remainingTime > 0) {
+                            reminder.remainingTime--;
+                        } else {
+                            this.playAlertSound(reminder.message || reminder.title || 'fim do timer');
+                            reminder.remainingTime = this.calculateTotalSeconds(reminder);
+                        }
+                    }, 1000);
+                },
+                stopReminder(id) {
+                    const reminder = this.reminders.find(r => r.id === id);
+                    if (!reminder) {
+                        return;
+                    }
+
+                    clearInterval(reminder.timer);
+                    reminder.running = false;
+                    reminder.remainingTime = this.calculateTotalSeconds(reminder);
+                    this.saveReminders();
+                },
+                restartReminder(id) {
+                    const reminder = this.reminders.find(r => r.id === id);
+                    if (!reminder) {
+                        return;
+                    }
+
+                    clearInterval(reminder.timer);
+                    reminder.running = false;
+                    reminder.remainingTime = this.calculateTotalSeconds(reminder);
+                    this.saveReminders();
+
+                    this.startTimer(reminder);
+                },
+                getAudioURL(text, slow = false) {
+                    return globalThis.generateTTSAudio(text, slow);
+                },
+                playAlertSound(text) {
+                    let audioSrc = this.getAudioURL(text, false);
+                    const alertSound = new Audio(audioSrc);
+                    alertSound.play().then(() => {
+                        alertSound.onended = () => {
+                            alertSound.remove();
+                        };
+                    }).catch(error => {
+                        console.log('Reprodução de áudio bloqueada:', error);
+                    });
+                },
+                sanitizeTimeInputs() {
+                    this.currentReminder.hours = Math.max(0, parseInt(this.currentReminder.hours) || 0);
+                    this.currentReminder.minutes = Math.max(0, Math.min(59, parseInt(this.currentReminder.minutes) || 0));
+                    this.currentReminder.seconds = Math.max(0, Math.min(59, parseInt(this.currentReminder.seconds) || 0));
+                },
+                calculateTotalSeconds(reminder) {
+                    return (reminder.hours * 3600) + (reminder.minutes * 60) + reminder.seconds;
+                },
+                formatTime(seconds) {
+                    const h = Math.floor(seconds / 3600);
+                    const m = Math.floor((seconds % 3600) / 60);
+                    const s = seconds % 60;
+                    return `${h}h ${m}m ${s}s`;
+                },
+                saveReminders() {
+                    localStorage.setItem('reminders', JSON.stringify(this.reminders));
+                },
+                resetForm() {
+                    this.currentReminder = { id: null, title: '', hours: '', minutes: '', seconds: '', message: '' };
+                },
+                closeFormModal() {
+                    this.resetForm();
+                    this.editMode = false;
+                    this.openModal = false;
+                },
+            }
+        }
+    </script>
+</body>
+</html>
