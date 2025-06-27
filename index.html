@@ -202,7 +202,12 @@
 
             let ttsBaseUrl = "https://labpixel.com.br/api-gateway/public/api/apis/helpers/tts"; // Ex: https://apps.tiagofranca.com/api/apis/helpers/tts
 
-            return `${ttsBaseUrl}?q=${text}&locale=pt&speed=${speed}`;
+            // 'https://translate.googleapis.com/translate_tts?client=gtx&q=Batatinha quando nasce&tl=pt&ttsspeed=0.8&tk=551170.969003';
+            const googleTTSBaseUrl = 'https://translate.googleapis.com/translate_tts';
+
+            // return `${ttsBaseUrl}?q=${text}&locale=pt&speed=${speed}`;
+            // return `${ttsBaseUrl}?q=${text}&locale=pt&speed=${speed}`;
+            return `${googleTTSBaseUrl}?client=gtx&q=${text}&tl=pt&ttsspeed=0.8&tk=551170.969003`;
         };
 
         function reminderApp() {
